@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://bflsj5tre3ll"]
+
+[ext_resource type="Texture2D" uid="uid://bnaemw60couu" path="res://icon.svg" id="1_fr7w4"]
+[ext_resource type="Script" uid="uid://cdm2slm615skc" path="res://Dashed/Scripts/Kunai.gd" id="2_i4lpy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_i4lpy"]
+
+[node name="Kunai" type="Node2D"]
+
+[node name="Kunai" type="Area2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Kunai"]
+texture = ExtResource("1_fr7w4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Kunai"]
+shape = SubResource("CircleShape2D_i4lpy")
+script = ExtResource("2_i4lpy")

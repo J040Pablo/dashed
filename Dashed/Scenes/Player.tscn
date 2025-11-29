@@ -1,0 +1,113 @@
+[gd_scene load_steps=16 format=3 uid="uid://bvh2vtf0i5lf2"]
+
+[ext_resource type="Script" uid="uid://p3p718o367jf" path="res://Dashed/Scripts/Player.gd" id="1_plahy"]
+[ext_resource type="Texture2D" uid="uid://cen6aby4kd5hc" path="res://Dashed/Assets/Sprites/DinoSprites - doux.png" id="2_plahy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_goavm"]
+atlas = ExtResource("2_plahy")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ee64w"]
+atlas = ExtResource("2_plahy")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6xyx2"]
+atlas = ExtResource("2_plahy")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1ubc0"]
+atlas = ExtResource("2_plahy")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_plahy"]
+atlas = ExtResource("2_plahy")
+region = Rect2(96, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g18qr"]
+atlas = ExtResource("2_plahy")
+region = Rect2(120, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mvwnj"]
+atlas = ExtResource("2_plahy")
+region = Rect2(144, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3ojrx"]
+atlas = ExtResource("2_plahy")
+region = Rect2(168, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_80s6m"]
+atlas = ExtResource("2_plahy")
+region = Rect2(192, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k0kjf"]
+atlas = ExtResource("2_plahy")
+region = Rect2(216, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1eau"]
+atlas = ExtResource("2_plahy")
+region = Rect2(240, 0, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1ubc0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_goavm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ee64w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6xyx2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1ubc0")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 16.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_plahy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g18qr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mvwnj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3ojrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_80s6m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k0kjf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r1eau")
+}],
+"loop": true,
+"name": &"Walking",
+"speed": 16.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_plahy"]
+radius = 7.0
+height = 18.0
+
+[node name="Player" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_plahy")
+movement_speed = 100.0
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1, -1)
+sprite_frames = SubResource("SpriteFrames_1ubc0")
+animation = &"Walking"
+autoplay = "Idle"
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_plahy")

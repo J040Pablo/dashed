@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://iyenl8jyl6hk"]
+
+[ext_resource type="Texture2D" uid="uid://b4g7tj52n31k4" path="res://Dashed/Assets/Sprites/enemy.png" id="1_qs5v7"]
+[ext_resource type="Script" uid="uid://vjowic6x8stm" path="res://Dashed/Scripts/Enemy.gd" id="2_cmsaa"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cmsaa"]
+
+[node name="Enemy" type="Node2D"]
+
+[node name="Enemy" type="CharacterBody2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Enemy"]
+texture = ExtResource("1_qs5v7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy"]
+shape = SubResource("CapsuleShape2D_cmsaa")
+script = ExtResource("2_cmsaa")

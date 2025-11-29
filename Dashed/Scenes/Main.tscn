@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://dheqm1whccrhq"]
+
+[ext_resource type="PackedScene" uid="uid://bvh2vtf0i5lf2" path="res://Dashed/Scenes/Player.tscn" id="1_ire0h"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource("1_ire0h")]
+speed = 10.0
+movement_speed = 100.0
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Projectiles" type="Node2D" parent="."]

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bhshq05wdku2l"]
+
+[ext_resource type="Script" uid="uid://cxqvmthsqc6t5" path="res://Dashed/Scripts/Hook.gd" id="1_c2fvy"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c2fvy"]
+
+[node name="Hook" type="Node2D"]
+
+[node name="Hook" type="Area2D" parent="."]
+script = ExtResource("1_c2fvy")
+
+[node name="Line2D" type="Line2D" parent="Hook"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hook"]
+shape = SubResource("CapsuleShape2D_c2fvy")

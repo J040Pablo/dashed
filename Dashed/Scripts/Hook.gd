@@ -1,41 +1,88 @@
 extends Node2D
 
-var target_enemy = null
-var active = true
-var returning = false
-var speed = 600
-var velocity = Vector2.ZERO
+@export var speed: float = 600
+@export var max_distance: float = 600
 
-func launch(target_pos: Vector2):
-	velocity = (target_pos - global_position).normalized() * speed
+var player: Node2D
+var target_enemy: Node2D = null
+var target_position: Vector2 = Vector2.ZERO
+var returning: bool = false
+var start_position: Vector2
 
-func _process(_delta):
-	if returning:
-		var dir = (get_parent().get_node("../Player").global_position - global_position)
-		if dir.length() < 5:
-			queue_free()
-			return
-		global_position += dir.normalized() * speed * _delta
-	elif target_enemy:
-		if not target_enemy.is_inside_tree():
-			returning = true
-	else:
-		global_position += velocity * _delta
-		# Colisão com inimigos
-		for e in get_parent().get_parent().get_node("Enemies").get_children():
-			if global_position.distance_to(e.global_position) < 20:
-				target_enemy = e
-				velocity = Vector2.ZERO
-				break
+@onready var line: Line2D = $Line2D
 
-func pull_player(player):
-	if not target_enemy: return
-	var dir = (target_enemy.global_position - player.global_position)
-	player.global_position += dir.normalized() * speed * get_process_delta_time()
-	if dir.length() < 5:
-		target_enemy.queue_free()
+func _ready():
+	start_position = global_position
+	line.clear_points()
+	# ponto 0 = posição do player em relação ao gancho, ponto 1 = origem do gancho
+	line.add_point(player.global_position - global_position)
+	line.add_point(Vector2.ZERO)
+
+	# Conecta sinais para detectar colisões com inimigos (áreas e corpos)
+	if has_signal("area_entered"):
+		connect("area_entered", Callable(self, "_on_area_entered"))
+	if has_signal("body_entered"):
+		connect("body_entered", Callable(self, "_on_body_entered"))
+
+func _physics_process(delta):
+	if not player:
 		queue_free()
+		return
 
-func return_to_player():
-	target_enemy = null
+	if returning:
+		# Volta para o player
+		var dir = (player.global_position - global_position).normalized()
+		global_position += dir * speed * delta
+		if global_position.distance_to(player.global_position) < 10:
+			# limpa referência no player antes de remover
+			if player:
+				player.hook = null
+			queue_free()
+	else:
+		if target_enemy:
+			# checa se o alvo ainda é válido (pode ter sido destruído)
+			if not is_instance_valid(target_enemy):
+				start_return()
+				return
+			# Gancho preso no inimigo, aguarda input do player
+			global_position = target_enemy.global_position
+			if Input.is_action_pressed("hook"):
+				# Puxa o player
+				player.start_pull(target_enemy)
+			elif Input.is_action_just_pressed("hook_release"):
+				start_return()
+		else:
+			# Vai para a posição alvo (capturada quando o gancho foi lançado)
+			if target_position == Vector2.ZERO:
+				# fallback: captura a posição atual do mouse caso não tenha sido passada
+				target_position = get_global_mouse_position()
+			var to_target = target_position - global_position
+			var dist = to_target.length()
+			if dist < 8:
+				# chegou no ponto alvo -> inicia retorno
+				start_return()
+			else:
+				var dir = to_target.normalized()
+				global_position += dir * speed * delta
+				if global_position.distance_to(start_position) > max_distance:
+					start_return()
+
+	# Atualiza linha
+	line.set_point_position(0, player.global_position - global_position)
+	line.set_point_position(1, Vector2.ZERO)
+
+func _on_area_entered(area):
+	if area.is_in_group("Enemies"):
+		target_enemy = area
+		return
+
+func _on_body_entered(body):
+	if body.is_in_group("Enemies"):
+		target_enemy = body
+
+func is_connected_to_enemy() -> bool:
+	return target_enemy != null
+
+func start_return():
 	returning = true
+	target_enemy = null

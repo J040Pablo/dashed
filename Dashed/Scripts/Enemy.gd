@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var speed: float = 120
+@export var speed: float = 20
 @export var min_distance: float = 24
 @export var attack_damage: int = 10
 @export var health: int = 50
@@ -53,3 +53,7 @@ func take_damage(damage: int):
 	print("Inimigo HP:", health)
 	if health <= 0:
 		queue_free()
+
+func die():
+	# Morte imediata (usado por efeitos como dash/gancho)
+	queue_free()

@@ -2,14 +2,14 @@
 
 [ext_resource type="Script" uid="uid://cxqvmthsqc6t5" path="res://Dashed/Scripts/Hook.gd" id="1_c2fvy"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c2fvy"]
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_mvafx"]
 
-[node name="Hook" type="Node2D"]
-
-[node name="Hook" type="Area2D" parent="."]
+[node name="Hook" type="Area2D"]
 script = ExtResource("1_c2fvy")
 
-[node name="Line2D" type="Line2D" parent="Hook"]
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(0, 8)
+width = 0.5
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hook"]
-shape = SubResource("CapsuleShape2D_c2fvy")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("SegmentShape2D_mvafx")

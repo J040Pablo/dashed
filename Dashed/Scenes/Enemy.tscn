@@ -130,9 +130,8 @@ animations = [{
 radius = 7.0
 height = 18.0
 
-[node name="Enemy" type="CharacterBody2D"]
+[node name="Enemy" type="CharacterBody2D" groups=["Enemies"]]
 script = ExtResource("2_cmsaa")
-speed = 10.0
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 texture_filter = 1

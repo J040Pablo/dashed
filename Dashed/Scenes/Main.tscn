@@ -18,8 +18,11 @@ zoom = Vector2(2, 2)
 
 [node name="Enemies" type="Node2D" parent="."]
 
-[node name="Enemy" parent="Enemies" instance=ExtResource("3_lgqsx")]
+[node name="Enemy" parent="Enemies" groups=["Enemies"] instance=ExtResource("3_lgqsx")]
 position = Vector2(-38, 33)
 
-[node name="Enemy2" parent="Enemies" instance=ExtResource("3_lgqsx")]
-position = Vector2(29, 32)
+[node name="Enemy2" parent="Enemies" groups=["Enemies"] instance=ExtResource("3_lgqsx")]
+position = Vector2(-3, 41)
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("3_lgqsx")]
+position = Vector2(35, 25)

@@ -11,7 +11,7 @@ var hook = null
 # Referência ao AnimatedSprite2D
 @onready var sprite: AnimatedSprite2D = $Sprite
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	# Movimento
 	character_direction.x = Input.get_axis("move_left", "move_right")
 	character_direction.y = Input.get_axis("move_up", "move_down")
@@ -37,15 +37,12 @@ func _physics_process(delta):
 	# Ataque corpo a corpo
 	if Input.is_action_just_pressed("attack"):
 		attack()
-		# Pode tocar animação de ataque depois
-		# sprite.play("Attack")
 
 	# Lançar kunai
 	if Input.is_action_just_pressed("kunai") and kunai_scene:
 		var k = kunai_scene.instantiate()
 		k.global_position = global_position
 		get_parent().get_node("Projectiles").add_child(k)
-		# k.launch(get_global_mouse_position()) → criar função launch
 
 	# Gancho
 	if Input.is_action_pressed("hook"):
@@ -55,7 +52,6 @@ func _physics_process(delta):
 			hook = hook_scene.instantiate()
 			hook.global_position = global_position
 			get_parent().get_node("Projectiles").add_child(hook)
-			# hook.launch(get_global_mouse_position()) → criar função launch
 
 func attack():
 	for e in get_parent().get_node("Enemies").get_children():

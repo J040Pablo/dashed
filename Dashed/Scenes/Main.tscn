@@ -1,18 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://dheqm1whccrhq"]
+[gd_scene load_steps=4 format=3 uid="uid://dheqm1whccrhq"]
 
 [ext_resource type="PackedScene" uid="uid://bvh2vtf0i5lf2" path="res://Dashed/Scenes/Player.tscn" id="1_ire0h"]
+[ext_resource type="Script" uid="uid://i2ahdhg0j702" path="res://Dashed/Scripts/Main.gd" id="2_04318"]
+[ext_resource type="PackedScene" uid="uid://iyenl8jyl6hk" path="res://Dashed/Scenes/Enemy.tscn" id="3_lgqsx"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("2_04318")
 
 [node name="Player" parent="." instance=ExtResource("1_ire0h")]
-speed = 10.0
-movement_speed = 100.0
-
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(2, 2)
-
-[node name="Enemies" type="Node2D" parent="."]
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Projectiles" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+
+[node name="Enemy" parent="." instance=ExtResource("3_lgqsx")]
+position = Vector2(0, 32)

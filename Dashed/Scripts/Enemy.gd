@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal died(position)
+
 @export var speed: float = 20
 @export var min_distance: float = 24
 @export var attack_damage: int = 10
@@ -91,8 +93,10 @@ func take_damage(damage: int):
 	# flash visual ao receber dano
 	_flash_sprite(sprite)
 	if health <= 0:
-		queue_free()
+		# emit signal and use die() so other systems can react (drops, effects)
+		die()
 
 func die():
 	# Morte imediata (usado por efeitos como dash/gancho)
+	emit_signal("died", global_position)
 	queue_free()

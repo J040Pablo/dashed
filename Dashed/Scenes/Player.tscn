@@ -1,12 +1,8 @@
-[gd_scene load_steps=28 format=3 uid="uid://bvh2vtf0i5lf2"]
+[gd_scene load_steps=26 format=3 uid="uid://bvh2vtf0i5lf2"]
 
 [ext_resource type="Script" uid="uid://p3p718o367jf" path="res://Dashed/Scripts/Player.gd" id="1_plahy"]
 [ext_resource type="PackedScene" uid="uid://bhshq05wdku2l" path="res://Dashed/Scenes/Hook.tscn" id="2_g18qr"]
 [ext_resource type="Texture2D" uid="uid://cen6aby4kd5hc" path="res://Dashed/Assets/Sprites/DinoSprites - doux.png" id="2_plahy"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ano4t"]
-atlas = ExtResource("2_plahy")
-region = Rect2(240, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0ol8a"]
 atlas = ExtResource("2_plahy")
@@ -15,10 +11,6 @@ region = Rect2(264, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="AtlasTexture_rm7se"]
 atlas = ExtResource("2_plahy")
 region = Rect2(288, 0, 24, 24)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_p1e4n"]
-atlas = ExtResource("2_plahy")
-region = Rect2(312, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_goavm"]
 atlas = ExtResource("2_plahy")
@@ -96,16 +88,10 @@ region = Rect2(240, 0, 24, 24)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ano4t")
-}, {
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_0ol8a")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_rm7se")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_p1e4n")
 }],
 "loop": false,
 "name": &"Attack",
@@ -190,12 +176,13 @@ motion_mode = 1
 script = ExtResource("1_plahy")
 movement_speed = 150.0
 hook_scene = ExtResource("2_g18qr")
+shield_scale = Vector2(0.009, 0.009)
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
 position = Vector2(1, -1)
 sprite_frames = SubResource("SpriteFrames_1ubc0")
-animation = &"Sliding"
+animation = &"Attack"
 autoplay = "Idle"
 
 [node name="Collision" type="CollisionShape2D" parent="."]

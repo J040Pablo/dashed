@@ -11,6 +11,43 @@ var attack_timer: float = 0.0
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
+func _ensure_flash_shader(target_sprite: AnimatedSprite2D):
+	if not target_sprite:
+		return
+	var mat = target_sprite.material
+	if mat and mat is ShaderMaterial:
+		return
+	var sh = Shader.new()
+	sh.code = """
+		shader_type canvas_item;
+		uniform float flash_amount : hint_range(0.0, 1.0) = 0.0;
+		void fragment() {
+			vec4 tex = texture(TEXTURE, UV);
+			vec3 outcol = mix(tex.rgb, vec3(1.0), flash_amount);
+			COLOR = vec4(outcol, tex.a);
+		}
+	"""
+	var sm = ShaderMaterial.new()
+	sm.shader = sh
+	target_sprite.material = sm
+
+func _flash_sprite(target_sprite: AnimatedSprite2D, duration := 0.12):
+	if not target_sprite:
+		return
+	_ensure_flash_shader(target_sprite)
+	var mat = target_sprite.material
+	if not mat or not (mat is ShaderMaterial):
+		return
+	mat.set_shader_parameter("flash_amount", 1.0)
+	# animação manual do flash para compatibilidade (reduz flash_amount até 0)
+	var steps = int(max(1, duration / 0.016))
+	var step_time = duration / steps
+	for i in range(steps):
+		await get_tree().create_timer(step_time).timeout
+		var v = lerp(1.0, 0.0, float(i + 1) / steps)
+		mat.set_shader_parameter("flash_amount", v)
+	mat.set_shader_parameter("flash_amount", 0.0)
+
 func _physics_process(delta):
 	if not target:
 		return
@@ -51,6 +88,8 @@ func attack_player():
 func take_damage(damage: int):
 	health -= damage
 	print("Inimigo HP:", health)
+	# flash visual ao receber dano
+	_flash_sprite(sprite)
 	if health <= 0:
 		queue_free()
 

@@ -8,6 +8,7 @@ extends CharacterBody2D
 @export var hook_scene: PackedScene
 @export var pull_speed: float = 800 # velocidade do player sendo puxado pelo gancho
 @export var pull_arrive_distance: float = 16
+@export var sliding_speed: float = 400 # velocidade reduzida quando o player está sendo puxado (Sliding)
 
 var character_direction: Vector2 = Vector2.ZERO
 var hook: Node = null
@@ -18,6 +19,45 @@ var pull_target: Node2D = null
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var enemies_node: Node2D = null
+
+func _ensure_flash_shader(target_sprite: AnimatedSprite2D):
+	# Ensure the sprite has a ShaderMaterial with a 'flash_amount' uniform
+	if not target_sprite:
+		return
+	var mat = target_sprite.material
+	if mat and mat is ShaderMaterial:
+		return
+	var sh = Shader.new()
+	sh.code = """
+		shader_type canvas_item;
+		uniform float flash_amount : hint_range(0.0, 1.0) = 0.0;
+		void fragment() {
+			vec4 tex = texture(TEXTURE, UV);
+			vec3 outcol = mix(tex.rgb, vec3(1.0), flash_amount);
+			COLOR = vec4(outcol, tex.a);
+		}
+	"""
+	var sm = ShaderMaterial.new()
+	sm.shader = sh
+	target_sprite.material = sm
+
+func _flash_sprite(target_sprite: AnimatedSprite2D, duration := 0.12):
+	if not target_sprite:
+		return
+	_ensure_flash_shader(target_sprite)
+	var mat = target_sprite.material
+	if not mat or not (mat is ShaderMaterial):
+		return
+	# set flash to 1 then tween back to 0
+	mat.set_shader_parameter("flash_amount", 1.0)
+	# animação manual do flash para compatibilidade (reduz flash_amount até 0)
+	var steps = int(max(1, duration / 0.016))
+	var step_time = duration / steps
+	for i in range(steps):
+		await get_tree().create_timer(step_time).timeout
+		var v = lerp(1.0, 0.0, float(i + 1) / steps)
+		mat.set_shader_parameter("flash_amount", v)
+	mat.set_shader_parameter("flash_amount", 0.0)
 
 func _ready():
 	if get_parent().has_node("Enemies"):
@@ -32,8 +72,8 @@ func _physics_process(delta):
 		attack_timer -= delta
 
 	if is_pulled and pull_target:
-		# Player sendo puxado para o inimigo
-		var pulled_anim := "Pulled"
+		# Player sendo puxado pelo gancho — animação de sliding
+		var pulled_anim := "Sliding"
 		if sprite.sprite_frames and sprite.sprite_frames.has_animation(pulled_anim):
 			if sprite.animation != pulled_anim:
 				sprite.animation = pulled_anim
@@ -60,8 +100,13 @@ func _physics_process(delta):
 			return
 
 		var dir = to_target.normalized()
-		# calcula próxima posição baseada na velocidade e no delta
-		var next_pos = global_position + dir * pull_speed * delta
+		# vira o sprite para a direção do pull (horizontal)
+		if dir.x > 0:
+			sprite.flip_h = false
+		elif dir.x < 0:
+			sprite.flip_h = true
+		# calcula próxima posição baseada na velocidade reduzida (sliding) e no delta
+		var next_pos = global_position + dir * sliding_speed * delta
 		var next_dist = next_pos.distance_to(pull_target.global_position)
 		# se chegar próximo o suficiente ou ultrapassar o alvo, considera chegada
 		if next_dist <= pull_arrive_distance or next_dist > dist:
@@ -77,7 +122,7 @@ func _physics_process(delta):
 			velocity = Vector2.ZERO
 			return
 
-		velocity = dir * pull_speed
+		velocity = dir * sliding_speed
 		move_and_slide()
 		return
 
@@ -170,6 +215,8 @@ func take_damage(damage: int):
 
 	health -= damage
 	print("Player HP:", health)
+	# flash visual ao receber dano
+	_flash_sprite(sprite)
 	if health <= 0:
 		print("Player morreu!")
 		queue_free()

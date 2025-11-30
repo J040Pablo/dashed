@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bvh2vtf0i5lf2"]
+[gd_scene load_steps=28 format=3 uid="uid://bvh2vtf0i5lf2"]
 
 [ext_resource type="Script" uid="uid://p3p718o367jf" path="res://Dashed/Scripts/Player.gd" id="1_plahy"]
 [ext_resource type="PackedScene" uid="uid://bhshq05wdku2l" path="res://Dashed/Scenes/Hook.tscn" id="2_g18qr"]
@@ -35,6 +35,34 @@ region = Rect2(48, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="AtlasTexture_1ubc0"]
 atlas = ExtResource("2_plahy")
 region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ueldo"]
+atlas = ExtResource("2_plahy")
+region = Rect2(408, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lrmis"]
+atlas = ExtResource("2_plahy")
+region = Rect2(432, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yj7am"]
+atlas = ExtResource("2_plahy")
+region = Rect2(456, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_medrd"]
+atlas = ExtResource("2_plahy")
+region = Rect2(480, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lq4xy"]
+atlas = ExtResource("2_plahy")
+region = Rect2(504, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_45eb5"]
+atlas = ExtResource("2_plahy")
+region = Rect2(528, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kx2eu"]
+atlas = ExtResource("2_plahy")
+region = Rect2(552, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_plahy"]
 atlas = ExtResource("2_plahy")
@@ -102,6 +130,32 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_ueldo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lrmis")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yj7am")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_medrd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lq4xy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_45eb5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kx2eu")
+}],
+"loop": false,
+"name": &"Sliding",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_plahy")
 }, {
 "duration": 1.0,
@@ -141,7 +195,7 @@ hook_scene = ExtResource("2_g18qr")
 texture_filter = 1
 position = Vector2(1, -1)
 sprite_frames = SubResource("SpriteFrames_1ubc0")
-animation = &"Attack"
+animation = &"Sliding"
 autoplay = "Idle"
 
 [node name="Collision" type="CollisionShape2D" parent="."]

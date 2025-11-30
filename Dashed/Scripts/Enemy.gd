@@ -1,39 +1,55 @@
 extends CharacterBody2D
 
-@export var speed: float = 120       # Velocidade do inimigo
-@export var min_distance: float = 24 # Distância mínima para parar antes do player
-var target: Node2D                   # Referência ao player
+@export var speed: float = 120
+@export var min_distance: float = 24
+@export var attack_damage: int = 10
+@export var health: int = 50
+@export var attack_cooldown: float = 1.0
 
-# Referência ao AnimatedSprite2D
+var target: Node2D
+var attack_timer: float = 0.0
+
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 func _physics_process(delta):
 	if not target:
 		return
 
-	# Vetor direção para o player
+	# Atualiza timer
+	attack_timer -= delta
+
 	var direction = (target.global_position - global_position).normalized()
 	var distance_to_player = global_position.distance_to(target.global_position)
 
 	if distance_to_player > min_distance:
-		# Move o inimigo em direção ao player
+		# Segue o player
 		velocity = direction * speed
 		move_and_slide()
-		
-		# Flip horizontal
+
 		if direction.x > 0:
 			sprite.flip_h = false
 		elif direction.x < 0:
 			sprite.flip_h = true
-		
-		# Toca animação de andar
+
 		if sprite.animation != "Walking":
 			sprite.play("Walking")
 	else:
-		# Para quando próximo do player
 		velocity = Vector2.ZERO
 		move_and_slide()
-		
-		# Toca animação de idle
-		if sprite.animation != "Idle":
-			sprite.play("Idle")
+
+		# Ataca se o cooldown terminou
+		if attack_timer <= 0:
+			attack_player()
+			attack_timer = attack_cooldown
+
+func attack_player():
+	if target:
+		if sprite.animation != "Attack":
+			sprite.play("Attack")
+		target.take_damage(attack_damage)
+
+func take_damage(damage: int):
+	health -= damage
+	print("Inimigo HP:", health)
+	if health <= 0:
+		queue_free()

@@ -1,8 +1,9 @@
 extends Node2D
 
 @onready var player = $Player
-@onready var enemy = $Enemy
+@onready var enemies_node = $Enemies
 
 func _ready():
-	print("Main carregada com sucesso")
-	enemy.target = player
+	for e in enemies_node.get_children():
+		if e:
+			e.target = player

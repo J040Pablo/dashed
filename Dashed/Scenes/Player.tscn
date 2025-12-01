@@ -176,7 +176,7 @@ motion_mode = 1
 script = ExtResource("1_plahy")
 movement_speed = 150.0
 hook_scene = ExtResource("2_g18qr")
-shield_scale = Vector2(0.009, 0.009)
+shield_scale = Vector2(1, 1)
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 texture_filter = 1

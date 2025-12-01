@@ -6,6 +6,7 @@ extends CharacterBody2D
 @export var attack_cooldown: float = 0.5
 @export var kunai_scene: PackedScene
 @export var hook_scene: PackedScene
+@export var rocket_scene: PackedScene
 @export var pull_speed: float = 800 # velocidade do player sendo puxado pelo gancho
 @export var pull_arrive_distance: float = 16
 @export var sliding_speed: float = 400 # velocidade reduzida quando o player está sendo puxado (Sliding)
@@ -16,10 +17,11 @@ extends CharacterBody2D
 @export var shield_texture: Texture2D
 @export var shield_offset: Vector2 = Vector2(0, 0)
 @export var shield_move_multiplier: float = 0.5
-@export var shield_scale: Vector2 = Vector2(0.6, 0.6)
+@export var shield_scale: Vector2 = Vector2(0.12, 0.12)
+@export var debug_logs: bool = false
 
 var is_shielding: bool = false
-var has_shield: bool = false
+var has_shield: bool = true
 
 var is_dashing: bool = false
 var dash_timer: float = 0.0
@@ -83,7 +85,8 @@ func _ready():
 	if get_parent().has_node("Enemies"):
 		enemies_node = get_parent().get_node("Enemies")
 	else:
-		print("Atenção: nó 'Enemies' não encontrado!")
+		if debug_logs:
+			print("Atenção: nó 'Enemies' não encontrado!")
 
 	sprite.connect("animation_finished", Callable(self, "_on_animation_finished"))
 
@@ -100,29 +103,59 @@ func _ready():
 	if _shield_sprite and not _shield_sprite.texture:
 		if shield_texture:
 			_shield_sprite.texture = shield_texture
+			# Ensure the shield sprite doesn't render at full texture resolution unexpectedly
+			if _shield_sprite.texture and _shield_sprite.texture.get_size():
+				var tex_size = _shield_sprite.texture.get_size()
+				var desired_px = 24.0
+				# compensate for parent/global scale and camera zoom so visual size matches desired_px on screen
+				var parent_scale = get_global_transform().get_scale()
+				var psx = max(0.000001, parent_scale.x)
+				var psy = max(0.000001, parent_scale.y)
+				var cam = get_viewport().get_camera_2d()
+				var cam_zoom = cam.zoom if cam != null else Vector2(1, 1)
+				var sx = desired_px / (max(1.0, tex_size.x) * psx * cam_zoom.x)
+				var sy = desired_px / (max(1.0, tex_size.y) * psy * cam_zoom.y)
+				var final_scale_ready = Vector2(sx, sy) * shield_scale
+				_shield_sprite.set_deferred("scale", final_scale_ready)
 		else:
 			# tenta carregar recurso padrão se existir no projeto
 			var p = "res://Dashed/Assets/Sprites/ShieldPlayer.png"
 			if ResourceLoader.exists(p):
 				_shield_sprite.texture = load(p)
 		_shield_sprite.visible = false
-		# aplica escala inicial do escudo
+		# aplica escala inicial do escudo (defensivo: garante textura e modulate)
+		if not _shield_sprite.texture:
+			var p = "res://Dashed/Assets/Sprites/ShieldPlayer.png"
+			if ResourceLoader.exists(p):
+				_shield_sprite.texture = load(p)
+		# force safe visual defaults
+		_shield_sprite.z_index = 10
+		_shield_sprite.modulate = Color(1, 1, 1, 1)
 		_shield_sprite.scale = shield_scale
 
 	# garante que a action 'shield' exista no InputMap (mapeada para botão direito do mouse)
 	if not InputMap.has_action("shield"):
+		# Apenas cria a action; mapeie o botão no Editor (evita mensagens de enum entre versões)
 		InputMap.add_action("shield")
-		var ev := InputEventMouseButton.new()
-		# use explicit button index for right mouse (2) to avoid enum name differences
-		ev.button_index = 2
-		InputMap.action_add_event("shield", ev)
+
+	# garante que a action 'rocket' exista (atalho Q)
+	if not InputMap.has_action("rocket"):
+		# cria a action, não adiciona evento por script — prefira mapear no Editor
+		InputMap.add_action("rocket")
+
+	# garante que a action 'dash_key' exista (mapeada para Shift) para detectar Shift de forma cross-version
+	if not InputMap.has_action("dash_key"):
+		InputMap.add_action("dash_key")
+		# Note: não adicionamos evento por script para evitar incompatibilidades entre versões
+		# garante que a action 'dash_key' exista (opcional mapping no Editor)
 
 func give_shield():
 	# Called when the player picks up a shield pickup in the world
 	if has_shield:
 		return
 	has_shield = true
-	print("Shield obtained!")
+	if debug_logs:
+		print("Shield obtained!")
 	# small flash to indicate pickup
 	_flash_sprite(sprite, 0.18)
 	# play Sliding animation briefly to show pickup
@@ -139,6 +172,28 @@ func give_shield():
 		var p = "res://Dashed/Assets/Sprites/ShieldPlayer.png"
 		if ResourceLoader.exists(p):
 			_shield_sprite.texture = load(p)
+			# Clamp visual size so it never becomes fullscreen
+			if _shield_sprite.texture and _shield_sprite.texture.get_size():
+					var tex_size2 = _shield_sprite.texture.get_size()
+					var desired_px2 = 16.0
+					# compensate for parent/global scale and camera zoom when assigning texture
+					var parent_scale2 = get_global_transform().get_scale()
+					var psx2 = max(0.000001, parent_scale2.x)
+					var psy2 = max(0.000001, parent_scale2.y)
+					var cam2 = get_viewport().get_camera_2d()
+					var cam_zoom2 = cam2.zoom if cam2 != null else Vector2(1, 1)
+					var sx2 = desired_px2 / (max(1.0, tex_size2.x) * psx2 * cam_zoom2.x)
+					var sy2 = desired_px2 / (max(1.0, tex_size2.y) * psy2 * cam_zoom2.y)
+					var final_scale_give = Vector2(sx2, sy2) * shield_scale
+					_shield_sprite.set_deferred("scale", final_scale_give)
+
+		# Ensure the player starts with shield visible (player always has shield)
+		has_shield = true
+		if _shield_sprite:
+			# debug: log shield texture size and visible state before forcing visible
+			if debug_logs:
+				print("[DEBUG] Player._shield_sprite assigned texture size=", _shield_sprite.texture.get_size(), " scale=", _shield_sprite.scale, " visible(before)=", _shield_sprite.visible)
+			_shield_sprite.set_deferred("visible", true)
 
 func _physics_process(delta):
 	if attack_timer > 0:
@@ -214,11 +269,49 @@ func _physics_process(delta):
 	# Shield: checa a action 'shield' (mapeada para botão direito ou customizada no InputMap)
 	# Só permite usar o escudo se o jogador já tiver pego (has_shield)
 	if has_shield and Input.is_action_pressed("shield") and not is_pulled and not is_dashing:
+		# Debug: log when shield branch is entered
+		if debug_logs:
+			print("[DEBUG] Shield branch entered: has_shield=", has_shield, " action_shield=", Input.is_action_pressed("shield"), " is_pulled=", is_pulled, " is_dashing=", is_dashing)
 		is_shielding = true
+		# (removed temporary FORCE) — leave computed scale/visibility to normal logic
 		if _shield_sprite:
 			_shield_sprite.visible = true
 			_shield_sprite.position = shield_offset
-			_shield_sprite.scale = shield_scale
+			# Compute a pixel-clamped scale so the shield sprite never becomes visually huge.
+			if _shield_sprite and _shield_sprite.texture:
+				var tex = _shield_sprite.texture
+				var tex_size = tex.get_size()
+				var desired_px = 16.0
+				# consider viewport size: don't exceed 20% of min(viewport)
+				var vsize = get_viewport().get_visible_rect().size
+				var max_px = min(vsize.x, vsize.y) * 0.2
+				desired_px = min(desired_px, max_px)
+				# compensate for parent/global scale so visual size matches desired_px on screen
+				var parent_scale3 = get_global_transform().get_scale()
+				var psx3 = max(0.0001, parent_scale3.x)
+				var psy3 = max(0.0001, parent_scale3.y)
+				var cam3 = get_viewport().get_camera_2d()
+				var cam_zoom3 = cam3.zoom if cam3 != null else Vector2(1, 1)
+				var sx = desired_px / (max(1.0, tex_size.x) * psx3 * cam_zoom3.x)
+				var sy = desired_px / (max(1.0, tex_size.y) * psy3 * cam_zoom3.y)
+				var final_scale = Vector2(sx, sy) * shield_scale
+				# clamp to avoid invisible/tiny or fullscreen scales
+				var min_scale = 0.000001
+				var max_scale = 0.3
+				final_scale.x = clamp(final_scale.x, min_scale, max_scale)
+				final_scale.y = clamp(final_scale.y, min_scale, max_scale)
+				# Debug: print detailed values to help diagnose oversized visuals
+				if debug_logs:
+					print("[DEBUG] Shield compute: tex_size=", tex_size, " parent_scale=", parent_scale3, " camera_zoom=", cam_zoom3, " desired_px=", desired_px, " sx=", sx, " sy=", sy, " shield_scale=", shield_scale, " final_scale=", final_scale)
+				# Apply deferred to avoid immediate override by other engine steps
+				_shield_sprite.set_deferred("scale", final_scale)
+				_shield_sprite.set_deferred("visible", true)
+			else:
+				_shield_sprite.scale = shield_scale
+				# debug: when showing shield, log texture size and global scale
+				if _shield_sprite and _shield_sprite.texture:
+					if debug_logs:
+						print("[DEBUG] Showing shield: tex_size=", _shield_sprite.texture.get_size(), " local_scale=", _shield_sprite.scale, " global_scale=", _shield_sprite.get_global_transform().get_scale())
 			# acompanha flip do jogador
 			_shield_sprite.flip_h = sprite.flip_h
 	else:
@@ -233,8 +326,10 @@ func _physics_process(delta):
 		sprite.flip_h = true
 
 	# Dash: Shift + direção => dash; Shift sozinho => dash na última direção
-	# Uso de tecla direta para Shift (KEY_SHIFT) para aceitar Shift esquerdo/direito
-	var shift_pressed := Input.is_key_pressed(KEY_SHIFT)
+	# Detecta Shift via InputMap action criada (`dash_key`) para evitar warnings de enum/cast
+	# Prefira mapear 'dash_key' no Project Settings -> Input Map
+	# Allow dash via InputMap action or fallback to KEY_SHIFT (attempt to support older/newer Godot)
+	var shift_pressed := Input.is_action_pressed("dash_key") or Input.is_key_pressed(KEY_SHIFT)
 	var shift_just_pressed := shift_pressed and not prev_shift_pressed
 	if shift_pressed and not is_dashing and dash_cooldown_timer <= 0.0 and not is_pulled and not is_shielding:
 		# checa se alguma direção foi apertada agora
@@ -355,6 +450,64 @@ func _physics_process(delta):
 	# Soltar gancho
 	if hook and Input.is_action_just_pressed("hook_release") and not is_shielding:
 		hook.start_return()
+
+	# Disparar foguetes teleguiados (Q) — dispara até 2 foguetes para os inimigos mais próximos
+	if Input.is_action_just_pressed("rocket"):
+		_fire_rockets(2)
+
+
+func _fire_rockets(count: int = 2) -> void:
+	if not enemies_node:
+		return
+	# coleta inimigos válidos
+	var enemies := []
+	for e in enemies_node.get_children():
+		if e and is_instance_valid(e):
+			enemies.append(e)
+	if enemies.size() == 0:
+		return
+	# dispara para os N inimigos mais próximos (encontra incrementalmente)
+	var spawned = 0
+	var used := []
+	while spawned < count:
+		var nearest = null
+		var nearest_d = 1e9
+		for e in enemies:
+			if e in used:
+				continue
+			var d = global_position.distance_to(e.global_position)
+			if d < nearest_d:
+				nearest = e
+				nearest_d = d
+		if nearest == null:
+			break
+		# instancia foguete
+		var rscene := rocket_scene
+		if not rscene and ResourceLoader.exists("res://Dashed/Scenes/Rocket.tscn"):
+			rscene = load("res://Dashed/Scenes/Rocket.tscn")
+		if rscene:
+			var r = rscene.instantiate()
+			# spawn slightly offset so it doesn't overlap the player
+			r.global_position = global_position + Vector2(0, -12)
+			# disable monitoring before adding so it won't immediately trigger collision
+			r.monitoring = false
+			if r.has_method("set_target"):
+				r.set_target(nearest)
+			elif r.has_variable("target"):
+				r.target = nearest
+			# adiciona ao nó de projectiles se existir
+			if get_parent() and get_parent().has_node("Projectiles"):
+				get_parent().get_node("Projectiles").add_child(r)
+			else:
+				get_parent().add_child(r)
+			# re-enable monitoring deferred (safe after current physics/frame)
+			r.set_deferred("monitoring", true)
+			spawned += 1
+			used.append(nearest)
+		else:
+			if debug_logs:
+				print("Rocket scene not found: cannot spawn rocket")
+			break
 		# se o jogador estiver sendo puxado, cancela o pull imediatamente
 		if is_pulled:
 			is_pulled = false
@@ -387,9 +540,11 @@ func take_damage(damage: int):
 		return
 
 	health -= damage
-	print("Player HP:", health)
+	if debug_logs:
+		print("Player HP:", health)
 	# flash visual ao receber dano
 	_flash_sprite(sprite)
 	if health <= 0:
-		print("Player morreu!")
+		if debug_logs:
+			print("Player morreu!")
 		queue_free()

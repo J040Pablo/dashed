@@ -8,7 +8,7 @@ extends Node2D
 @export var max_enemies: int = 8
 @export var shield_drop_scene: PackedScene
 @export var match_time_threshold: float = 30.0
-@export var shield_drop_chance: float = 1.0
+@export var shield_drop_chance: float = 0.0
 
 var _spawn_timer: float = 0.0
 var _rng = RandomNumberGenerator.new()
@@ -52,12 +52,7 @@ func _spawn_enemy():
 			e.connect("died", Callable(self, "_on_enemy_died"))
 
 
-func _on_enemy_died(position: Vector2) -> void:
-	# checa se já passou do tempo necessário para dropar shields
-	if match_time < match_time_threshold:
-		return
-	# sorteio probabilístico para dropar um escudo
-	if shield_drop_scene and _rng.randf() <= shield_drop_chance:
-		var s = shield_drop_scene.instantiate()
-		s.global_position = position
-		add_child(s)
+func _on_enemy_died(death_position: Vector2) -> void:
+	# Shield drops disabled: player always has shield. No item spawned on enemy death.
+	# (Left intentionally empty.)
+	pass

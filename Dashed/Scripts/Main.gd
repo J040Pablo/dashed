@@ -47,12 +47,12 @@ func _spawn_enemy():
 	enemies_node.add_child(e)
 	if e and is_instance_valid(e) and is_instance_valid(player):
 		e.target = player
-		# conecta sinal de morte para dropar itens
-		if e.has_signal("died"):
-			e.connect("died", Callable(self, "_on_enemy_died"))
+	# conecta sinal de morte para dropar itens
+	if e.has_signal("died"):
+		e.connect("died", Callable(self, "_on_enemy_died"))
 
 
-func _on_enemy_died(death_position: Vector2) -> void:
+func _on_enemy_died(_death_position: Vector2) -> void:
 	# Shield drops disabled: player always has shield. No item spawned on enemy death.
 	# (Left intentionally empty.)
 	pass

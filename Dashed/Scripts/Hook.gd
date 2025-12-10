@@ -46,11 +46,15 @@ func _physics_process(delta):
 				return
 			# Gancho preso no inimigo, aguarda input do player
 			global_position = target_enemy.global_position
-			if Input.is_action_pressed("hook"):
-				# Puxa o player
-				player.start_pull(target_enemy)
-			elif Input.is_action_just_pressed("hook_release"):
+			
+			# Se apertar Ctrl (ou tecla de cancelar), retorna o gancho
+			var cancel_pressed = Input.is_physical_key_pressed(KEY_CTRL) or Input.is_physical_key_pressed(KEY_ESCAPE)
+			if cancel_pressed:
 				start_return()
+			# Se segurar E, puxa o player para o inimigo
+			elif Input.is_action_pressed("hook"):
+				if player and not player.is_pulled:
+					player.start_pull(target_enemy)
 		else:
 			# Vai para a posição alvo (capturada quando o gancho foi lançado)
 			if target_position == Vector2.ZERO:

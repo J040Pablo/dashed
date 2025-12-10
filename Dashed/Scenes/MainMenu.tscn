@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cl0w5vv8n31nu"]
 
-[ext_resource type="Script" uid="uid://cl4t1ptirxd51" path="res://Dashed/Scenes/main_menu.gd" id="1_xt0ia"]
+[ext_resource type="Script" uid="uid://cl4t1ptirxd51" path="res://Dashed/Scripts/main_menu.gd" id="1_xt0ia"]
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_xt0ia")

@@ -18,7 +18,7 @@ extends CharacterBody2D
 @export var shield_offset: Vector2 = Vector2(0, 0)
 @export var shield_move_multiplier: float = 0.5
 @export var shield_scale: Vector2 = Vector2(0.12, 0.12)
-@export var debug_logs: bool = false
+@export var debug_logs: bool = true
 
 var is_shielding: bool = false
 var has_shield: bool = true
@@ -433,27 +433,27 @@ func _physics_process(delta):
 		k.global_position = global_position
 		get_parent().get_node("Projectiles").add_child(k)
 
-	# Lançar gancho
+	# Lançar gancho (E) - apenas cria o gancho, não controla retorno
 	if Input.is_action_just_pressed("hook") and not hook and hook_scene and not is_shielding:
+		# Cria novo gancho
+		if debug_logs:
+			print("Lançando gancho!")
 		hook = hook_scene.instantiate()
 		hook.global_position = global_position
 		hook.player = self
 		# captura a posição do cursor no momento do lançamento (para o gancho não seguir o cursor)
-		if hook.has_method("set"):
-			# se o nó aceitar atribuição direta
-			hook.target_position = get_global_mouse_position()
-		else:
-			# fallback
-			hook.target_position = get_global_mouse_position()
+		hook.target_position = get_global_mouse_position()
 		get_parent().add_child(hook)
-
-	# Soltar gancho
-	if hook and Input.is_action_just_pressed("hook_release") and not is_shielding:
-		hook.start_return()
+	elif Input.is_action_just_pressed("hook") and not hook_scene and debug_logs:
+		print("Gancho não lançado - hook_scene:", hook_scene)
 
 	# Disparar foguetes teleguiados (Q) — dispara até 2 foguetes para os inimigos mais próximos
 	if Input.is_action_just_pressed("rocket"):
+		if debug_logs:
+			print("Tentando disparar foguetes - enemies_node:", enemies_node)
 		_fire_rockets(2)
+	elif Input.is_action_just_pressed("rocket") and debug_logs:
+		print("Ação rocket não detectada")
 
 
 func _fire_rockets(count: int = 2) -> void:

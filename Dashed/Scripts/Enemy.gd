@@ -14,7 +14,7 @@ signal died(position)
 
 
 var target: Node2D
-var attack_timer: float = 0.0
+var attack_timer: float = 1.0  # Start with cooldown to prevent instant attacks
 var _backoff_timer: float = 0.0
 
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -80,8 +80,8 @@ func _physics_process(delta):
 		elif direction.x < 0:
 			sprite.flip_h = true
 
-		if sprite.animation != "Walking":
-			sprite.play("Walking")
+	if sprite.animation != "Walking":
+		sprite.play("Walking")
 	else:
 		# When within min_distance, normally stop and attack.
 		# However, if we're overlapping the target (very close), push back slightly
@@ -91,7 +91,7 @@ func _physics_process(delta):
 			# Prefer a lateral/backwards push so the enemy doesn't sit on the player's head.
 			var diff = global_position - target.global_position
 			var abs_dx = abs(diff.x)
-			var abs_dy = abs(diff.y)
+			var _abs_dy = abs(diff.y)
 			var back_dir = Vector2.ZERO
 			# If mostly vertically aligned, push more horizontally to get off the head
 			if abs_dx < (min_distance * 0.35):
@@ -111,16 +111,19 @@ func _physics_process(delta):
 			velocity = Vector2.ZERO
 			move_and_slide()
 
-			# Ataca se o cooldown terminou
-			if attack_timer <= 0:
-				attack_player()
-				attack_timer = attack_cooldown
+		# Ataca se o cooldown terminou
+		if attack_timer <= 0:
+			attack_player()
+			attack_timer = attack_cooldown
 
 func attack_player():
-	if target:
-		if sprite.animation != "Attack":
-			sprite.play("Attack")
-		target.take_damage(attack_damage)
+	if target and target.has_method("take_damage"):
+		# Only attack if we're actually close enough
+		var dist = global_position.distance_to(target.global_position)
+		if dist <= min_distance:
+			if sprite.animation != "Attack":
+				sprite.play("Attack")
+			target.take_damage(attack_damage)
 
 func take_damage(damage: int):
 	health -= damage
